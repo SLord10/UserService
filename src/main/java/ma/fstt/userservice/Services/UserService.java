@@ -57,7 +57,7 @@ public class UserService {
         }
     }
 
-    public ResponseEntity<Map<String, Object>> login(String username, String password) throws Exception {
+    public ResponseEntity<Map<String, Object>> login(String username, String password) {
         User user = UserRepo.findByUsernameAndPassword(username, password);
 
         if (user != null) {
