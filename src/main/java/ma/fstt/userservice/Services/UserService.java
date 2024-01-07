@@ -2,12 +2,16 @@ package ma.fstt.userservice.Services;
 
 import ma.fstt.userservice.Entities.User;
 import ma.fstt.userservice.Repositories.UserRepo;
+import ma.fstt.userservice.utlis.JsonConverter;
+import org.apache.tomcat.util.json.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class UserService {
@@ -26,6 +30,10 @@ public class UserService {
         return UserRepo.findById(id).get();
     }
 
+    public User getone(String username){
+        return UserRepo.findByUsername(username);
+    }
+
     public List<User> getall(){
         return UserRepo.findAll();
     }
@@ -34,29 +42,39 @@ public class UserService {
         UserRepo.save(User);
     }
 
-    public ResponseEntity<String> Register(User user) {
+    public ResponseEntity<Map<String, String>> Register(User user) {
         User existingUser = UserRepo.findByUsernameOrEmail(user.getUsername(), user.getEmail());
 
         if (existingUser == null) {
             UserRepo.save(user);
-            return ResponseEntity.ok("{\"message\": \"saved\"}");
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "saved");
+            return ResponseEntity.ok(response);
         } else {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("{\"message\": \"the user already exists\"}");
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "the user already exists");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
         }
     }
 
-
-    public ResponseEntity<String> login(String username, String password) {
+    public ResponseEntity<Map<String, Object>> login(String username, String password) throws Exception {
         User user = UserRepo.findByUsernameAndPassword(username, password);
 
         if (user != null) {
-            return ResponseEntity.ok("{\"message\": \"" + user.getUsername() + "\"}");
+            Map<String, Object> response = new HashMap<>();
+            response.put("data", user);
+            return ResponseEntity.ok(response);
         } else {
             if (UserRepo.findByUsername(username) != null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("{\"message\": \"the password is incorrect\"}");
+                Map<String, Object> response = new HashMap<>();
+                response.put("message", "the password is incorrect");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
             } else {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("{\"message\": \"the user does not exist\"}");
+                Map<String, Object> response = new HashMap<>();
+                response.put("message", "the user does not exist");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
             }
         }
     }
+
 }
