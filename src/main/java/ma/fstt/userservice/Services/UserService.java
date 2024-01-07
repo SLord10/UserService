@@ -3,6 +3,8 @@ package ma.fstt.userservice.Services;
 import ma.fstt.userservice.Entities.User;
 import ma.fstt.userservice.Repositories.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -32,28 +34,29 @@ public class UserService {
         UserRepo.save(User);
     }
 
-    public String Register(User user){
-        User user1 = UserRepo.findByUsernameOrEmail(user.getUsername(),user.getEmail());
-        if (user1 == null){
+    public ResponseEntity<String> Register(User user) {
+        User existingUser = UserRepo.findByUsernameOrEmail(user.getUsername(), user.getEmail());
+
+        if (existingUser == null) {
             UserRepo.save(user);
-            return "saved";
+            return ResponseEntity.ok("{\"message\": \"saved\"}");
+        } else {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("{\"message\": \"the user already exists\"}");
         }
-        else
-            return "the user already exists";
-    }
-
-    public String login(String username, String password){
-        User user = UserRepo.findByUsernameAndPassword(username,password);
-        if (user != null)
-            return user.getUsername();
-        else
-            if (UserRepo.findByUsername(username) != null)
-                return "the password is incorrect";
-                else
-                    return "the user does not exist";
     }
 
 
+    public ResponseEntity<String> login(String username, String password) {
+        User user = UserRepo.findByUsernameAndPassword(username, password);
 
-
+        if (user != null) {
+            return ResponseEntity.ok("{\"message\": \"" + user.getUsername() + "\"}");
+        } else {
+            if (UserRepo.findByUsername(username) != null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("{\"message\": \"the password is incorrect\"}");
+            } else {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("{\"message\": \"the user does not exist\"}");
+            }
+        }
+    }
 }

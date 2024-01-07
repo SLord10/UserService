@@ -3,11 +3,13 @@ package ma.fstt.userservice.Controllers;
 import ma.fstt.userservice.Entities.User;
 import ma.fstt.userservice.Services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RequestMapping("/user")
 @RestController
+@CrossOrigin
 public class UserCtl {
 
     @Autowired
@@ -51,16 +53,12 @@ public class UserCtl {
     }
 
     @PostMapping("/login")
-    public String login( @RequestBody User user){
+    public ResponseEntity<String> login(@RequestBody User user){
         return userService.login(user.getUsername(), user.getPassword());
     }
 
     @PostMapping("/register")
-    public String Register(@RequestBody User user){
+    public ResponseEntity<String> Register(@RequestBody User user){
         return userService.Register(user);
     }
-
-
-
-
 }
